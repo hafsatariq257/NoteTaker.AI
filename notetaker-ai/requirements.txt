@@ -1,0 +1,8 @@
+flask
+flask-login
+flask-sqlalchemy
+openai
+python-dotenv
+werkzeug
+pytest
+pytest-flask

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - NoteTaker.AI</title>
+</head>
+<body>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <div class="logo-wrap">
+        <div class="logo-icon"></div>
+        <h1>Create your account</h1>
+        <p>Start using NoteTaker.AI for free</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash error">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="/signup">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" placeholder="Your full name" required />
+        </div>
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" name="email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Min 6 characters" required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:13px; font-size:1rem; margin-top:8px;">
+          Create Account
+        </button>
+      </form>
+
+      <p style="text-align:center; margin-top:20px; font-size:0.875rem; color:#8892A4;">
+        Already have an account? <a href="/login" style="color:#00B4D8; font-weight:600; text-decoration:none;">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+</body>
+</html>

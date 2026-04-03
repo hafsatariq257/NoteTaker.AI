@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings - NoteTaker.AI</title>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="notes-header">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="/dashboard" class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;">Back</a>
+      <span style="color:#1e2d45;">|</span>
+      <span style="font-weight:700; color:#fff;">Settings</span>
+    </div>
+  </div>
+
+  <div style="max-width:640px; margin:0 auto; padding:36px 40px;">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash success">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Profile -->
+    <div class="notes-card" style="margin-bottom:20px;">
+      <h2 style="margin-bottom:20px;">Profile</h2>
+      <form method="POST" action="/settings">
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" name="name" placeholder="Your name" value="{{ user.name or '' }}" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" value="{{ user.email }}" disabled style="opacity:0.5; cursor:not-allowed;" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px;">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Connected Accounts -->
+    <div class="notes-card" style="margin-bottom:20px;">
+      <h2 style="margin-bottom:20px;">Connected Accounts</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; border:1px solid #1e2d45; border-radius:12px; padding:14px 16px;">
+        <span style="font-weight:500; font-size:0.9rem; color:#cbd5e1;">Google Calendar</span>
+        <button class="btn btn-outline" style="padding:7px 16px; font-size:0.8rem;">Connect</button>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notes-card" style="margin-bottom:20px;">
+      <h2 style="margin-bottom:20px;">Notifications</h2>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #1e2d45;">
+        <span style="font-size:0.9rem; color:#cbd5e1;">Meeting ready notification</span>
+        <div id="toggle1" onclick="toggleSwitch('toggle1')" style="width:40px; height:22px; background:#00B4D8; border-radius:999px; cursor:pointer; position:relative; transition:background 0.2s;">
+          <div id="knob1" style="width:16px; height:16px; background:white; border-radius:50%; position:absolute; top:3px; left:21px; transition:left 0.2s;"></div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 0;">
+        <span style="font-size:0.9rem; color:#cbd5e1;">Weekly summary email</span>
+        <div id="toggle2" onclick="toggleSwitch('toggle2')" style="width:40px; height:22px; background:#1e2d45; border-radius:999px; cursor:pointer; position:relative; transition:background 0.2s;">
+          <div id="knob2" style="width:16px; height:16px; background:white; border-radius:50%; position:absolute; top:3px; left:3px; transition:left 0.2s;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="notes-card" style="border-color:rgba(239,68,68,0.2); margin-bottom:20px;">
+      <h2 style="color:#ef4444; margin-bottom:12px;">Danger Zone</h2>
+      <p style="color:#8892A4; font-size:0.875rem; margin-bottom:16px; line-height:1.6;">
+        Deleting your account will permanently remove all your meetings and data. This cannot be undone.
+      </p>
+      <form method="POST" action="/delete-account">
+        <button type="submit" class="btn btn-danger" style="padding:10px 24px;" onclick="return confirm('Are you sure? This will permanently delete your account.')">
+          Delete Account
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    const states = { toggle1: true, toggle2: false };
+
+    function toggleSwitch(id) {
+      states[id] = !states[id];
+      const el = document.getElementById(id);
+      const knob = document.getElementById('knob' + id.replace('toggle', ''));
+      if (states[id]) {
+        el.style.background = '#00B4D8';
+        knob.style.left = '21px';
+      } else {
+        el.style.background = '#1e2d45';
+        knob.style.left = '3px';
+      }
+    }
+  </script>
+
+</body>
+</html>

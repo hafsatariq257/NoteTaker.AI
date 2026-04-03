@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ meeting.title }} - NoteTaker.AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .details-card { background: #112240; padding: 40px; border-radius: 15px; margin-top: 20px; }
+    .summary-box { background: rgba(100, 255, 218, 0.05); border-left: 4px solid #64ffda; padding: 20px; margin: 20px 0; line-height: 1.6; }
+    .action-item { list-style: none; padding: 10px 0; border-bottom: 1px solid #30363d; color: #8892b0; }
+    .action-item::before { content: "✔ "; color: #64ffda; margin-right: 10px; }
+    .transcript-text { font-size: 0.9em; color: #8892b0; white-space: pre-wrap; margin-top: 30px; border-top: 1px solid #30363d; padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-content">
+      <a href="/dashboard" style="color: #64ffda; text-decoration: none;">← Back to Library</a>
+      
+      <div class="details-card">
+        <h1 style="color: white;">{{ meeting.title }}</h1>
+        <p style="color: #64ffda;">{{ meeting.created_at.strftime('%B %d, %Y') }}</p>
+
+        <h3>AI Summary</h3>
+        <div class="summary-box">
+            {{ meeting.summary }}
+        </div>
+
+        <h3>Action Items</h3>
+        <ul>
+            {% for item in action_items %}
+                <li class="action-item">{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <details>
+            <summary style="color: #64ffda; cursor: pointer; margin-top: 20px;">View Full Transcript</summary>
+            <div class="transcript-text">{{ meeting.transcript }}</div>
+        </details>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

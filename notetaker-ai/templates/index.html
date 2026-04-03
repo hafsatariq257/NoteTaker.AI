@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NoteTaker.AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 60px 40px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(184, 216, 248, 0.4);
+      max-width: 480px;
+      width: 90%;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      background: #2563eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .logo-inner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid white;
+      border-radius: 50%;
+      border-bottom-color: transparent;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #0A0F1E;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #6b7280;
+      font-size: 1rem;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #bfdbfe;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .redirect-text {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-inner"></div>
+    </div>
+    <h1>NoteTaker.AI</h1>
+    <p>Your meetings. Recorded, Summarized, Done.</p>
+    <div class="spinner"></div>
+    <p class="redirect-text">Taking you to your dashboard...</p>
+  </div>
+
+  <script>
+    // Redirect to dashboard if logged in, otherwise go to landing
+    setTimeout(() => {
+      window.location.href = "/landing";
+    }, 1500);
+  </script>
+</body>
+</html>

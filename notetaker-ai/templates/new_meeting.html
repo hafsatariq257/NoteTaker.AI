@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Session - NoteTaker.AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Naye elements ke liye thori extra styling */
+    .upload-box {
+      border: 2px dashed #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+    .upload-box:hover { border-color: var(--blue-glow); }
+    .file-input { margin-top: 10px; color: var(--gray-text); }
+    .divider { margin: 30px 0; text-align: center; position: relative; color: var(--gray-text); }
+    .divider::before { content: ""; position: absolute; top: 50%; left: 0; width: 45%; height: 1px; background: #30363d; }
+    .divider::after { content: ""; position: absolute; top: 50%; right: 0; width: 45%; height: 1px; background: #30363d; }
+  </style>
+</head>
+<body>
+  
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="/dashboard" class="logo">
+        <div class="logo-icon"></div>
+        <span>NoteTaker.AI</span>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
+        <a href="/dashboard" class="sidebar-link">🏠 <span>Library</span></a>
+        <a href="/new-meeting" class="sidebar-link active">🎙️ <span>New Session</span></a>
+        <a href="/settings" class="sidebar-link">⚙️ <span>Settings</span></a>
+        <a href="/logout" class="sidebar-link logout" style="margin-top: auto;">🚪 <span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Create New Session</h1>
+        <p>Capture live audio or analyze existing transcripts.</p>
+      </div>
+
+      <div class="cloud-sync">
+        <span id="sync-status">● Live Engine Ready</span>
+      </div>
+
+      <div class="record-card" id="record-container" style="margin-bottom: 30px; max-width: 100%;">
+        <div class="record-header">
+          <h2 id="mic-heading">Live Microphone</h2>
+          <div class="streaming-badge" id="live-badge" style="display: none;">Live Recording</div>
+        </div>
+        <p class="record-meta">Speak clearly. Browser AI will capture in real-time.</p>
+
+        <div class="live-transcript-box" id="live-transcript" style="height: 150px; overflow-y: auto;">
+          Click the button below to start capturing...
+        </div>
+
+        <div class="record-footer">
+          <div class="audio-visualizer" id="visualizer" style="display: none;">
+            <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+            <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+          </div>
+          <div class="record-actions">
+            <button class="btn btn-primary" id="start-btn" onclick="startRecording()">Start Mic</button>
+            <button class="btn btn-outline" id="stop-btn" onclick="stopRecording()" style="display: none; border-color: #EF4444; color: #EF4444;">Stop & Analyze</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider">OR UPLOAD AUDIO</div>
+
+      <div class="auth-card" id="upload-section" style="max-width: 100%; margin-bottom: 30px;">
+        <h3>Upload Audio File (Whisper AI)</h3>
+        <p class="record-meta">Best for long recordings. Processed locally on your PC.</p>
+        <div class="upload-box">
+            <input type="file" id="audioFile" class="file-input" accept="audio/*">
+            <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="uploadAudioFile()">Process with Whisper ✨</button>
+        </div>
+      </div>
+
+      <div class="auth-card" id="form-section" style="max-width: 100%;">
+        <form method="POST" action="/new-meeting" enctype="multipart/form-data" id="meeting-form">
+          <div class="form-group">
+            <label>Session Title (Optional)</label>
+            <input type="text" name="title" id="meeting-title" placeholder="e.g. Project Sync-up" />
+          </div>
+
+          <div class="form-group">
+            <label>Paste Transcript (Manual)</label>
+            <textarea name="transcript_text" placeholder="Already have text? Paste it here..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-outline" style="width: 100%;" onclick="showLoading()">
+            Process Manual Input ✨
+          </button>
+        </form>
+      </div>
+
+      <div class="loading-section" id="loading-section" style="display: none; text-align: center; padding: 50px;">
+        <div class="spinner"></div>
+        <h2 style="margin-top: 20px;" id="loading-text">NoteTaker AI is Thinking...</h2>
+        <p style="color: var(--gray-text);" id="loading-subtext">Generating your premium summary and action items.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let recognition;
+    let finalTranscript = "";
+
+    // 1. Live Microphone Logic
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event) => {
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        document.getElementById('live-transcript').innerHTML = 
+          '<span style="color:white">' + finalTranscript + '</span>' + 
+          '<span style="color:var(--gray-text)">' + interimTranscript + '</span>';
+      };
+    }
+
+    function startRecording() {
+      finalTranscript = "";
+      recognition.start();
+      document.getElementById('start-btn').style.display = 'none';
+      document.getElementById('stop-btn').style.display = 'block';
+      document.getElementById('live-badge').style.display = 'inline-flex';
+      document.getElementById('visualizer').style.display = 'flex';
+      document.getElementById('live-transcript').innerHTML = "Listening...";
+      document.getElementById('sync-status').innerText = "● Capturing Audio...";
+      document.getElementById('sync-status').style.color = "#64ffda";
+    }
+
+    function stopRecording() {
+      recognition.stop();
+      showLoading("Processing Audio", "Analyzing your live speech...");
+      
+      const title = document.getElementById('meeting-title').value || "Live Mic Session";
+      
+      fetch('/process-live', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript: finalTranscript, title: title })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.success) { window.location.href = '/dashboard'; }
+        else { alert("Error processing AI notes."); location.reload(); }
+      });
+    }
+
+    // 2. Whisper Audio Upload Logic
+    async function uploadAudioFile() {
+        const fileInput = document.getElementById('audioFile');
+        if (fileInput.files.length === 0) {
+            alert("Please select an audio file first!");
+            return;
+        }
+
+        const title = document.getElementById('meeting-title').value || "Audio Upload Session";
+        const formData = new FormData();
+        formData.append('audio', fileInput.files[0]);
+
+        showLoading("Whisper AI is Transcribing", "This happens locally on your computer. Please wait...");
+
+        try {
+            const response = await fetch('/upload-audio', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('loading-text').innerText = "Summarizing with Llama 3";
+                const summaryRes = await fetch('/process-live', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transcript: data.transcript, title: title })
+                });
+                const summaryData = await summaryRes.json();
+                if (summaryData.success) window.location.href = '/dashboard';
+            } else {
+                alert("Error: " + data.error);
+                location.reload();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Upload failed.");
+            location.reload();
+        }
+    }
+
+    function showLoading(headline, subline) {
+      document.getElementById('record-container').style.display = 'none';
+      document.getElementById('upload-section').style.display = 'none';
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('loading-section').style.display = 'block';
+      if(headline) document.getElementById('loading-text').innerText = headline;
+      if(subline) document.getElementById('loading-subtext').innerText = subline;
+    }
+  </script>
+</body>
+</html>
